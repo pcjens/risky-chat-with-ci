@@ -6,3 +6,6 @@
 !builds
 !builds/*
 !.gitignore
+!test.sh
+!.github
+!.github/**/*
