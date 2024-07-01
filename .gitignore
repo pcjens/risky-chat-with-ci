@@ -1,0 +1,8 @@
+*
+!README.md
+!LICENSE.md
+!config.h
+!riskychat.c
+!builds
+!builds/*
+!.gitignore
