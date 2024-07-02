@@ -358,6 +358,9 @@ static ssize_t read_line(int fd, char **buffer, size_t *buffer_len,
   }
   (*buffer)[*string_len] = '\0';
 
+  if (RISKYCHAT_VERBOSE >= 3)
+    printf("%s", *buffer);
+
   return 0;
 }
 
@@ -620,7 +623,7 @@ static ssize_t write_http_chat_response(int fd, size_t *written_len,
   return 0;
 }
 
-/* Returns 1 if the strings are equal, 0 if not. */
+/* Returns 1 if the strings are equal (ignoring any whitespace), 0 if not. */
 static int eq_ignore_whitespace(char *a, char *b) {
   int counter_a = 0, counter_b = 0;
   while (a[counter_a] != '\0' && b[counter_b] != '\0') {
@@ -636,6 +639,25 @@ static int eq_ignore_whitespace(char *a, char *b) {
     counter_b++;
   }
   return 1;
+}
+
+/* Returns 1 if the strings are equal (case-insensitively), 0 if not. */
+static int eq_ignore_case(char *a, char *b) {
+  int counter_a = 0, counter_b = 0;
+  while (a[counter_a] != '\0' && b[counter_b] != '\0') {
+    int d = (int)a[counter_a] - (int)b[counter_b];
+    if (d == 0) {
+      /* matches exactly, continue */
+    } else if ((d == 'a'-'A' && 'A' <= b[counter_b] && b[counter_b] <= 'Z') ||
+               (d == 'A'-'a' && 'A' <= a[counter_a] && a[counter_a] <= 'Z')) {
+      /* matches, cases differ */
+    } else {
+      return 0;
+    }
+    counter_a++;
+    counter_b++;
+  }
+  return a[counter_a] == b[counter_b];
 }
 
 void decode_percent(char *buffer, size_t *buffer_len) {
@@ -852,12 +874,12 @@ static int handle_connection(struct connection_ctx *ctx) {
       }
 
       token = strtok(ctx->buffer, ":");
-      if (token != NULL && strcmp("Content-Length", token) == 0) {
+      if (token != NULL && eq_ignore_case("Content-Length", token)) {
         token = strtok(NULL, ":");
         ctx->expected_content_length = atoi(token);
         if (RISKYCHAT_VERBOSE >= 2)
           printf("(%ld) ", ctx->expected_content_length);
-      } else if (token != NULL && strcmp("Cookie", token) == 0) {
+      } else if (token != NULL && eq_ignore_case("Cookie", token)) {
         token = strtok(NULL, ":");
         key = strtok(token, "=");
         while (key != NULL) {
@@ -931,6 +953,11 @@ static int handle_connection(struct connection_ctx *ctx) {
         if (ctx->user_id == 0 || is_expired_user(ctx->user_id)) {
           decode_percent(ctx->buffer, &ctx->read_len);
           name_len = strlen(ctx->buffer) - 5;
+          if (name_len < 0) {
+            name_len = 0;
+          } else if (name_len > 30) {
+            name_len = 30;
+          }
           name = malloc(name_len + 1);
           if (name == NULL) {
             perror("error when allocating name");
