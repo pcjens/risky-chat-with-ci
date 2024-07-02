@@ -17,7 +17,7 @@ jobs:
       - name: Check formatting
         run: 'diff riskychat.c <(clang-format riskychat.c)'
       - name: Build
-        run: cc -O2 -oriskychat riskychat.c
+        run: cc -O2 -std=c89 -Wall -Werror -oriskychat riskychat.c
       - name: Test
         run: sh test.sh
   tag_release_and_deploy:

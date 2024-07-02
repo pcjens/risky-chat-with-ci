@@ -8,6 +8,27 @@ user has not posted anything in 5 minutes, making a nice tradeoff
 between transient identity and anonymity, and being able to ensure two
 sequential posts are from the same person.
 
+## Fullstack Part 11 (CI/CD) note
+
+This is a copy of the [pcjens/risky-chat](https://github.com/pcjens/risky-chat)
+repository for the purposes of the CI/CD course, with the following steps done
+in a GitHub Actions workflow:
+- Code formatting is checked against clang-format.
+- The code is built, with warnings as errors to serve as a linting step.
+- The code is tested by the testing script [test.sh](test.sh), which starts up
+  the application and makes a few requests to it to ensure that a user can enter
+  the chat, post something, and see it appear.
+- Unless skipped by including "#skip" in the commit message, the code is
+  additionally built, tagged as a new version, and deployed at:
+  <https://risky-chat-8f8d4484.fly.dev/>
+- Notably, there's no discord notifications since I'd rather not publicize the
+  deployment URL further (the chat app *is* entirely unrestricted and public).
+  And I think they are trivial enough to add that I don't think that their
+  omission is a big issue.
+
+The main repository for the CI/CD course is
+[pcjens/full-stack-open-pokedex](https://github.com/pcjens/full-stack-open-pokedex).
+
 ## Important security note
 
 This application has intentionally designed security risks, including
