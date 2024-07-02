@@ -1,0 +1,26 @@
+# fly.toml app configuration file generated for risky-chat-8f8d4484 on 2024-07-01T21:55:15+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'risky-chat-8f8d4484'
+primary_region = 'arn'
+
+[build]
+
+[deploy]
+  strategy = 'canary'
+
+[processes]
+  app = '0.0.0.0 8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = false
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'

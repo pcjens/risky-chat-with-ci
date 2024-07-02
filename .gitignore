@@ -9,3 +9,5 @@
 !test.sh
 !.github
 !.github/**/*
+!fly.toml
+!Dockerfile

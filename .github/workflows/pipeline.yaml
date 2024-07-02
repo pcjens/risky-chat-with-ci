@@ -20,27 +20,31 @@ jobs:
         run: cc -O2 -oriskychat riskychat.c
       - name: Test
         run: sh test.sh
-  # tag_release_and_deploy:
-  #   if: ${{ github.event_name == 'push' && !contains(join(toJson(github.event.commits.*.message)), '#skip') }}
-  #   needs: [lint_and_test]
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: write
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: '0'
-  #     - name: Create a new tag except if skipped by a commit message
-  #       uses: anothrNick/github-tag-action@a2c70ae13a881faf2b4953baaa9e49731997ab36
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         DEFAULT_BUMP: patch
-  #     - name: Build
-  #       run: cc -O2 -oriskychat riskychat.c
-  #     - name: Prepare deployment
-  #       uses: superfly/flyctl-actions/setup-flyctl@master
-  #     - name: Deploy
-  #       run: flyctl deploy --remote-only
-  #       env:
-  #         FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  tag_release_and_deploy:
+    if: ${{ github.event_name == 'push' && !contains(join(toJson(github.event.commits.*.message)), '#skip') }}
+    needs: [lint_and_test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Install musl-gcc
+        run: |
+          apt-get update
+          apt-get install -y --no-recommends musl-tools musl-dev
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+      - name: Create a new tag
+        uses: anothrNick/github-tag-action@a2c70ae13a881faf2b4953baaa9e49731997ab36
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
+      - name: Build
+        run: musl-gcc -static -O2 -oriskychat riskychat.c
+      - name: Prepare deployment
+        uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
