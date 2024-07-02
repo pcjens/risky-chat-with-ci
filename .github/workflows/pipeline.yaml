@@ -28,9 +28,10 @@ jobs:
       contents: write
     steps:
       - name: Install musl-gcc
-        run: |
-          apt-get update
-          apt-get install -y --no-recommends musl-tools musl-dev
+        uses: awalsh128/cache-apt-pkgs-action@a6c3917cc929dd0345bfb2d3feaf9101823370ad
+        with:
+          packages: musl-tools musl-dev
+          version: 1.0
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
