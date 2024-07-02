@@ -648,8 +648,8 @@ static int eq_ignore_case(char *a, char *b) {
     int d = (int)a[counter_a] - (int)b[counter_b];
     if (d == 0) {
       /* matches exactly, continue */
-    } else if ((d == 'a'-'A' && 'A' <= b[counter_b] && b[counter_b] <= 'Z') ||
-               (d == 'A'-'a' && 'A' <= a[counter_a] && a[counter_a] <= 'Z')) {
+    } else if ((d == 'a' - 'A' && 'A' <= b[counter_b] && b[counter_b] <= 'Z') ||
+               (d == 'A' - 'a' && 'A' <= a[counter_a] && a[counter_a] <= 'Z')) {
       /* matches, cases differ */
     } else {
       return 0;
