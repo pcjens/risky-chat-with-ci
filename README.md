@@ -18,6 +18,9 @@ in a GitHub Actions workflow:
 - The code is tested by the testing script [test.sh](test.sh), which starts up
   the application and makes a few requests to it to ensure that a user can enter
   the chat, post something, and see it appear.
+  - There's no unit tests, since the code is quite messy, and I think these e2e
+    tests are quite enough for the purposes of the exercise. See below anecdote
+    for where I already spent hours!
 - Unless skipped by including "#skip" in the commit message, the code is
   additionally built, tagged as a new version, and deployed at:
   <https://risky-chat-8f8d4484.fly.dev/>
@@ -28,6 +31,22 @@ in a GitHub Actions workflow:
 
 The main repository for the CI/CD course is
 [pcjens/full-stack-open-pokedex](https://github.com/pcjens/full-stack-open-pokedex).
+
+As a fun anecdote, I did run into some issues that the exercise description
+warned about, regarding "legacy code"! When I wrote this server for the cyber
+security course, I only tested it locally, probably only on Firefox, so I had
+entirely forgotten that the header handling code (much like... basically all of
+the code) was very naive, in this case comparing header names
+*case-sensitively*.
+
+This led to very odd issues in fly.io where the app launched and seemed to work
+initially, but you couldn't log in. Turns out, since the app wasn't reading the
+headers correctly, it couldn't read the Content-Length, and assumed that the
+login form simply sent an empty body, and this eventually resulted in the server
+crashing from a *malloc* failing! I think the malloc failed due to the size
+being passed to it being "-5", thanks to some intentionally non-defensive code
+assuming that you'd send it a properly formatted body with the /login request.
+That was a tough one to debug!
 
 ## Important security note
 
